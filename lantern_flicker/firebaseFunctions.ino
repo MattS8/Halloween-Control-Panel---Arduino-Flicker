@@ -98,7 +98,6 @@ void handleDataRecieved(StreamData data) {
 #ifdef HAR_DEBUG
       Serial.println("No endpoint found on backend. Creating new device...");
 #endif
-      FirebaseData firebaseDataSEND;
       FirebaseJson json;
       json.add("dropDelay", Lantern.dropDelay);
       json.add("dropValue", Lantern.dropValue);
@@ -110,6 +109,7 @@ void handleDataRecieved(StreamData data) {
       json.add("smoothing", Lantern.smoothing);
       json.add("pin", Lantern.pin);
       Firebase.set(firebaseDataSEND, DevicePath, json);
+      delay(3000);
     } else {
 #ifdef HAR_DEBUG
     Serial.print("Stream returned non-JSON response: ");

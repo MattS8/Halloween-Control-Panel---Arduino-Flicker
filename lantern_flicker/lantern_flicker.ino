@@ -50,7 +50,7 @@ void loop()
 			analogWrite(Lantern.pin, downLimit + (upLimit - downLimit)/Lantern.dropValue);
 			upLimit = random(downLimit, Lantern.maxBrightness);
 			direction *= -1;
-			delayMiscroseconds(Lantern.dropDelay);
+			delayMicroseconds(Lantern.dropDelay);
 		}
 	} else {
 		if (level <= downLimit) {
@@ -59,7 +59,7 @@ void loop()
 		}	
 	}
 	level += direction;
-	delayMiscroseconds(Lantern.flickerRate);
+	delayMicroseconds(Lantern.flickerRate);
 
 	analogWrite(Lantern.pin, level);
 }

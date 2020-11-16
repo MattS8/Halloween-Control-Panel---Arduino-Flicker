@@ -19,6 +19,7 @@ static const String FIREBASE_HOST = "halloween-control-center.firebaseio.com";
 static const String FIREBASE_AUTH = "dHKCDHppSOQcBKU5a49DgfOOzVoxXdJIB7PaJDa7";
 
 FirebaseData firebaseDataRECV;
+FirebaseData firebaseDataSEND;
 String DevicePath = "";
 bool newDataReceived = false;
 bool WiFiSetup = false;
