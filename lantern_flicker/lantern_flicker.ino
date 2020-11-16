@@ -38,7 +38,6 @@ void loop()
 		connectToFirebase();
 
 
-
 	// Set instance variables to initial values if they were never set up before
 	// or if new data was read from firebase
 	if (newDataReceived) {
@@ -51,7 +50,7 @@ void loop()
 			analogWrite(Lantern.pin, downLimit + (upLimit - downLimit)/Lantern.dropValue);
 			upLimit = random(downLimit, Lantern.maxBrightness);
 			direction *= -1;
-			delay(Lantern.dropDelay);
+			delayMiscroseconds(Lantern.dropDelay);
 		}
 	} else {
 		if (level <= downLimit) {
@@ -60,7 +59,7 @@ void loop()
 		}	
 	}
 	level += direction;
-	delay(Lantern.flickerRate);
+	delayMiscroseconds(Lantern.flickerRate);
 
 	analogWrite(Lantern.pin, level);
 }
