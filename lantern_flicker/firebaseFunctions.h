@@ -21,19 +21,21 @@ static const String FIREBASE_AUTH = "dHKCDHppSOQcBKU5a49DgfOOzVoxXdJIB7PaJDa7";
 FirebaseData firebaseDataRECV;
 String DevicePath = "";
 bool newDataReceived = false;
+bool WiFiSetup = false;
+bool FirebaseSetup = false;
 
 /*
     Setting default values will allow the latern to work even before it has read
     data from Firebase backend.
 */
 LanternData Lantern = {
-    -1, //pin
-    -1, //maxBrightness
-    -1, //minBrightness
-    -1, //smoothing
-    -1, //flickerRate
-    -1, //dropDelay 
-    -1  //dropValue
+    2, //pin
+    150, //maxBrightness
+    0, //minBrightness
+    1, //smoothing
+    1000, //flickerRate
+    65000, //dropDelay 
+    1  //dropValue
 };
 
 bool lanternDataReceived();

@@ -1,37 +1,14 @@
 #include "firebaseFunctions.h"
 
-bool lanternDataReceived() {
-    return Lantern.pin != -1 
-        && Lantern.maxBrightness != -1 
-        && Lantern.minBrightness != -1 
-        && Lantern.flickerRate != -1 
-        && Lantern.smoothing != -1
-        && Lantern.dropValue != -1;
-}
 
 #define CON_WIFI_DEBUG
-void connectToFirebase() {
+void connectToWiFi() {
+  WiFiSetup = true;
+  WiFi.begin(WIFI_AP_NAME, WIFI_AP_PASS);
+}
 
-    // Connect to Wifi
-    WiFi.begin(WIFI_AP_NAME, WIFI_AP_PASS);
-#ifdef CON_WIFI_DEBUG
-	Serial.print("Connecting to Wi-Fi");
-#endif // CON_WIFI_DEBUG
-	long timeoutStart = millis();
-	while (WiFi.status() != WL_CONNECTED) {
-#ifdef CON_WIFI_DEBUG
-		Serial.print(".");
-#endif // CON_WIFI_DEBUG
-		delay(300);
-		if (millis() - timeoutStart > 8000) {
-#ifdef CON_WIFI_DEBUG
-			Serial.println();
-			Serial.println("Couldn't connect to wifi... timeout.");
-			delay(1000);
-#endif
-			ESP.restart();
-		}
-	}
+void connectToFirebase() {
+  FirebaseSetup = true;
 #ifdef CON_WIFI_DEBUG
 	Serial.println();
 	Serial.print("Connected with IP: ");
@@ -51,8 +28,6 @@ void connectToFirebase() {
         Serial.println("------------------------------------");
         Serial.println();
 #endif
-        delay(2000);
-        ESP.reset();
     }
 
     Firebase.setStreamCallback(firebaseDataRECV, handleDataRecieved, handleTimeout);
@@ -119,6 +94,22 @@ void handleDataRecieved(StreamData data) {
             }
             newDataReceived = true;
         }
+    } else if (data.dataType() == "null") {
+#ifdef HAR_DEBUG
+      Serial.println("No endpoint found on backend. Creating new device...");
+#endif
+      FirebaseData firebaseDataSEND;
+      FirebaseJson json;
+      json.add("dropDelay", Lantern.dropDelay);
+      json.add("dropValue", Lantern.dropValue);
+      json.add("flickerRate", Lantern.flickerRate);
+      json.add("groupName", "Lanterns");
+      json.add("name", String(ESP.getChipId()));
+      json.add("maxBrightness", Lantern.maxBrightness);
+      json.add("minBrightness", Lantern.minBrightness);
+      json.add("smoothing", Lantern.smoothing);
+      json.add("pin", Lantern.pin);
+      Firebase.set(firebaseDataSEND, DevicePath, json);
     } else {
 #ifdef HAR_DEBUG
     Serial.print("Stream returned non-JSON response: ");

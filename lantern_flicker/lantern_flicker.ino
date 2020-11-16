@@ -18,8 +18,7 @@ void setup()
 	
 	randomSeed(analogRead(A0));
 
-	setupFirebaseFunctions();	
-	connectToFirebase();
+	setupFirebaseFunctions();
 }
 
 void lanternSetup()
@@ -32,13 +31,17 @@ void lanternSetup()
 
 void loop() 
 {
-	// Don't do anything until the lantern is properly set up!
-	if (!lanternDataReceived())
-		return;
+	if (!WiFiSetup)
+		connectToWiFi();
+
+	if (!FirebaseSetup && WiFi.status() == WL_CONNECTED)
+		connectToFirebase();
+
+
 
 	// Set instance variables to initial values if they were never set up before
 	// or if new data was read from firebase
-	if (upLimit == -1 || newDataReceived) {
+	if (newDataReceived) {
 		lanternSetup();
 		newDataReceived = false;
 	}
