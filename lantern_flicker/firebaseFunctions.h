@@ -4,6 +4,12 @@
 #include "FirebaseESP8266.h"
 #include "WiFiCreds.h"
 #include <ESP8266WiFi.h>
+#include <FS.h>
+
+#ifndef LOCAL_FILE
+#define LOCAL_FILE
+const char* LanternFilePath = "Lantern.dat";
+#endif
 
 typedef struct LanternData {
     int pin;					// Pin number associated with lamp

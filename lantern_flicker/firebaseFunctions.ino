@@ -1,5 +1,32 @@
 #include "firebaseFunctions.h"
 
+#define WLD_DEBUG
+void writeLocalData()
+{
+  if (!SPIFFS.format()) {
+#ifdef WLD_DEBUG
+    Serial.println("File System Formatting Failed.");
+#endif
+    return;
+  }
+
+  File f = SPIFFS.open(LanternFilePath, "w");
+  if (!f) {
+#ifdef WLD_DEBUG
+    Serial.println("Failed to open file.");
+#endif
+    return;
+  }
+
+  f.write(((uint8_t *) &Lantern), sizeof(LanternData));
+  f.flush();
+  f.close();
+
+#ifdef WLD_DEBUG
+  Serial.println("Finished writing Lantern to local storage.");
+#endif
+}
+
 
 #define CON_WIFI_DEBUG
 void connectToWiFi() {
@@ -93,6 +120,7 @@ void handleDataRecieved(StreamData data) {
 #endif                
             }
             newDataReceived = true;
+            writeLocalData();
         }
     } else if (data.dataType() == "null") {
 #ifdef HAR_DEBUG

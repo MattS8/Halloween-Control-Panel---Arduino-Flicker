@@ -11,12 +11,54 @@ int direction = -1;					// +1 for ramping up, -1 for ramping down
 
 // Nano PWM: 3, 5, 6, 9, 10, and 11
 
+#define RLD_DEBUG
+void readLocalData()
+{
+	if (!SPIFFS.begin()) {
+#ifdef RLD_DEBUG
+		Serial.println("SPIFFS Initialization FAILED.");
+#endif
+		return;
+	}
+
+	File f = SPIFFS.open(LanternFilePath, "r");
+
+	if (!f) {
+#ifdef RLD_DEBUG
+		Serial.println("Failed to open file.");
+#endif
+		return;
+	}
+
+	Lantern.pin = (int) f.read();
+	Lantern.maxBrightness = (int) f.read();
+	Lantern.minBrightness = (int) f.read();
+	Lantern.smoothing = (int) f.read();
+	Lantern.flickerRate = (int) f.read();
+	Lantern.dropDelay = (int) f.read();
+	Lantern.dropValue = (int) f.read();
+
+	f.close();
+#ifdef RLD_DEBUG
+	Serial.println("Read in LanternData from file:");
+	Serial.print("Pin: "); Serial.println(Lantern.pin);
+	Serial.print("maxBrightness: "); Serial.println(Lantern.maxBrightness);
+	Serial.print("minBrightness: "); Serial.println(Lantern.minBrightness);
+	Serial.print("smoothing: "); Serial.println(Lantern.smoothing);
+	Serial.print("flickerRate: "); Serial.println(Lantern.flickerRate);
+	Serial.print("dropDelay: "); Serial.println(Lantern.dropDelay);
+	Serial.print("dropValue: "); Serial.println(Lantern.dropValue);
+#endif
+}
+
 void setup() 
 {
 	Serial.begin(115200);
 	// Loop through all lamps and set the pinMode
 	
 	randomSeed(analogRead(A0));
+
+	readLocalData();
 
 	setupFirebaseFunctions();
 }
