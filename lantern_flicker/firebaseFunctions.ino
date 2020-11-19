@@ -124,8 +124,8 @@ void handleDataRecieved(StreamData data) {
 #endif                
             }
             newDataReceived = true;
-            writeLocalData();
         }
+        writeLocalData();
     } else if (data.dataType() == "null") {
 #ifdef HAR_DEBUG
       Serial.println("No endpoint found on backend. Creating new device...");

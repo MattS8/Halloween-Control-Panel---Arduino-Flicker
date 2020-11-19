@@ -34,6 +34,7 @@ void readLocalData()
 
 	while (f.available()) {
 		*pointer = f.read();
+		++pointer;
 	}
 
 	if (Lantern.dropValue == 0)
