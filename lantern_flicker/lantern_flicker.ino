@@ -30,13 +30,14 @@ void readLocalData()
 		return;
 	}
 
-	Lantern.pin = (int) f.read();
-	Lantern.maxBrightness = (int) f.read();
-	Lantern.minBrightness = (int) f.read();
-	Lantern.smoothing = (int) f.read();
-	Lantern.flickerRate = (int) f.read();
-	Lantern.dropDelay = (int) f.read();
-	Lantern.dropValue = (int) f.read();
+	uint8_t* pointer = (uint8_t*) &Lantern;
+
+	while (f.available()) {
+		*pointer = f.read();
+	}
+
+	if (Lantern.dropValue == 0)
+		Lantern.dropValue = 1;
 
 	f.close();
 #ifdef RLD_DEBUG

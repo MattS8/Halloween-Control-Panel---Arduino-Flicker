@@ -93,6 +93,7 @@ void handleDataRecieved(StreamData data) {
         size_t len = json->iteratorBegin();
         String key, value = "";
         int type = 0;
+        int temp = 1;
 
         for (size_t i = 0; i < len; i++) {
             json->iteratorGet(i, type, key, value);
@@ -108,8 +109,11 @@ void handleDataRecieved(StreamData data) {
                 Lantern.flickerRate = value.toInt();
             else if (key == "dropDelay")
                 Lantern.dropDelay = value.toInt();
-            else if (key == "dropValue")
-                Lantern.dropValue = value.toInt();
+            else if (key == "dropValue") {
+                temp = value.toInt();
+                if (temp != 0)
+                  Lantern.dropValue = value.toInt();
+            }
             else {
 #ifdef HAR_DEBUG
         Serial.println("Unexpected response...");
