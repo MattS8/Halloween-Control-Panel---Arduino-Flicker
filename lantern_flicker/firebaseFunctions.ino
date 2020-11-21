@@ -93,7 +93,7 @@ void handleDataRecieved(StreamData data) {
         size_t len = json->iteratorBegin();
         String key, value = "";
         int type = 0;
-        int temp = 1;
+        int temp = -1;
 
         for (size_t i = 0; i < len; i++) {
             json->iteratorGet(i, type, key, value);
@@ -103,20 +103,33 @@ void handleDataRecieved(StreamData data) {
                 Lantern.maxBrightness = value.toInt();
             else if (key == "minBrightness")
                 Lantern.minBrightness = value.toInt();
-            else if (key == "smoothing")
-                Lantern.smoothing = value.toInt();
-            else if (key == "flickerRate")
-                Lantern.flickerRate = value.toInt();
-            else if (key == "dropDelay")
-                Lantern.dropDelay = value.toInt();
+            else if (key == "smoothing") {
+              temp = value.toInt();
+              if (temp > 0) Lantern.smoothing = temp;
+            }
+            else if (key == "rampDelay") {
+              temp = value.toInt();
+              if (temp > 0) Lantern.rampDelay = value.toInt();
+            }
+            else if (key == "dropDelay") {
+              temp = value.toInt();
+              if (temp > 0) Lantern.dropDelay = value.toInt();
+            }
             else if (key == "dropValue") {
                 temp = value.toInt();
-                if (temp != 0)
-                  Lantern.dropValue = value.toInt();
+                if (temp > 0) Lantern.dropValue = value.toInt();
+            }
+            else if (key == "flickerDelayMin") {
+                temp = value.toInt();
+                if (temp > 0) Lantern.flickerDelayMin = value.toInt();
+            }
+            else if (key == "flickerDelayMax") {
+                temp = value.toInt();
+                if (temp > 0) Lantern.flickerDelayMax = value.toInt();
             }
             else {
 #ifdef HAR_DEBUG
-        Serial.println("Unexpected response...");
+        Serial.println("Skipping value...");
         Serial.print("TYPE: ");
         Serial.println(type == FirebaseJson::JSON_OBJECT ? "object" : "array");
         Serial.print("KEY: ");
@@ -133,13 +146,15 @@ void handleDataRecieved(StreamData data) {
       FirebaseJson json;
       json.add("dropDelay", Lantern.dropDelay);
       json.add("dropValue", Lantern.dropValue);
-      json.add("flickerRate", Lantern.flickerRate);
+      json.add("rampDelay", Lantern.rampDelay);
       json.add("groupName", "Lanterns");
       json.add("name", String(ESP.getChipId()));
       json.add("maxBrightness", Lantern.maxBrightness);
       json.add("minBrightness", Lantern.minBrightness);
       json.add("smoothing", Lantern.smoothing);
       json.add("pin", Lantern.pin);
+      json.add("flickerDelayMin", Lantern.flickerDelayMin);
+      json.add("flickerDelayMax", Lantern.flickerDelayMax);
       Firebase.set(firebaseDataSEND, DevicePath, json);
       delay(3000);
     } else {

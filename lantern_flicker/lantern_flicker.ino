@@ -47,9 +47,11 @@ void readLocalData()
 	Serial.print("maxBrightness: "); Serial.println(Lantern.maxBrightness);
 	Serial.print("minBrightness: "); Serial.println(Lantern.minBrightness);
 	Serial.print("smoothing: "); Serial.println(Lantern.smoothing);
-	Serial.print("flickerRate: "); Serial.println(Lantern.flickerRate);
+	Serial.print("rampDelay: "); Serial.println(Lantern.rampDelay);
 	Serial.print("dropDelay: "); Serial.println(Lantern.dropDelay);
 	Serial.print("dropValue: "); Serial.println(Lantern.dropValue);
+	Serial.print("flickerDelayMin: "); Serial.println(Lantern.flickerDelayMin);
+	Serial.print("flickerDelayMax: "); Serial.println(Lantern.flickerDelayMax);
 #endif
 }
 
@@ -92,18 +94,25 @@ void loop()
 	if (direction > 0) {
 		if (level >= upLimit) {
 			analogWrite(Lantern.pin, downLimit + (upLimit - downLimit)/Lantern.dropValue);
+			int actualDropDelay = Lantern.dropDelay * (upLimit - downLimit)/Lantern.dropValue;
+			if (actualDropDelay < 1)
+				actualDropDelay = 1;
+			if(actualDropDelay > MAX_DROP_DELAY)
+				actualDropDelay = MAX_DROP_DELAY;
+
 			upLimit = random(downLimit, Lantern.maxBrightness);
 			direction *= -1;
-			delayMicroseconds(Lantern.dropDelay);
+			delayMicroseconds(actualDropDelay);
 		}
 	} else {
 		if (level <= downLimit) {
 			downLimit = random(Lantern.minBrightness, upLimit);
 			direction *= -1;
+			delay(random(Lantern.flickerDelayMin, Lantern.flickerDelayMax));
 		}	
 	}
 	level += direction;
-	delayMicroseconds(Lantern.flickerRate);
+	delayMicroseconds(Lantern.rampDelay);
 
 	analogWrite(Lantern.pin, level);
 }

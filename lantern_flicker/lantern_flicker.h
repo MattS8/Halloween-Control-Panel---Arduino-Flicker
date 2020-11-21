@@ -9,4 +9,6 @@
 const char* LanternFilePath = "Lantern.dat";
 #endif
 
+#define MAX_DROP_DELAY 15000
+
 #endif
