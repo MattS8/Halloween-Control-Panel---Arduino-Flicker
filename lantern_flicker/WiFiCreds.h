@@ -3,7 +3,7 @@
 
 #include <ESP8266WiFi.h>
 
-static const String WIFI_AP_NAME = "<ENTER AP NAME HERE>";
-static const String WIFI_AP_PASS = "<ENTER WIFI PASSWORD HERE>";
+static const String WIFI_AP_NAME = "ENTER_AP_NAME_HERE";
+static const String WIFI_AP_PASS = "ENTER_WIFI_PASSWORD_HERE";
 
 #endif

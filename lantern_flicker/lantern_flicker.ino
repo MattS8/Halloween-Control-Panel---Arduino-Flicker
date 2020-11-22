@@ -93,12 +93,16 @@ void loop()
 
 	if (direction > 0) {
 		if (level >= upLimit) {
-			analogWrite(Lantern.pin, downLimit + (upLimit - downLimit)/Lantern.dropValue);
-			int actualDropDelay = Lantern.dropDelay * (upLimit - downLimit)/Lantern.dropValue;
+			int instantDropLevel = downLimit + (upLimit - downLimit)/Lantern.dropValue;
+			analogWrite(Lantern.pin, instantDropLevel);
+			int actualDropDelay = Lantern.dropDelay * (upLimit - instantDropLevel)/Lantern.dropValue;
+			
 			if (actualDropDelay < 1)
 				actualDropDelay = 1;
 			if(actualDropDelay > MAX_DROP_DELAY)
 				actualDropDelay = MAX_DROP_DELAY;
+
+			level = instantDropLevel;
 
 			upLimit = random(downLimit, Lantern.maxBrightness);
 			direction *= -1;
