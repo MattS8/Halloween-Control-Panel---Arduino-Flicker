@@ -56,8 +56,10 @@ void setup()
 
 void loop() 
 {
-	if (direction > 0) {
-		if (level >= upLimit) {
+	if (direction > 0) 
+	{
+		if (level >= upLimit) 
+		{
 			int instantDropLevel = downLimit + (upLimit - downLimit)/Flicker->dropValue;
 			analogWrite(Flicker->pin, instantDropLevel);
 			int actualDropDelay = Flicker->dropDelay * (upLimit - instantDropLevel)/Flicker->dropValue;
@@ -73,8 +75,10 @@ void loop()
 			direction *= -1;
 			delayMicroseconds(actualDropDelay);
 		}
-	} else {
-		if (level <= downLimit) {
+	} else 
+	{
+		if (level <= downLimit) 
+		{
 			downLimit = random(Flicker->minBrightness, upLimit);
 			direction *= -1;
 			delay(random(Flicker->flickerDelayMin, Flicker->flickerDelayMax));
