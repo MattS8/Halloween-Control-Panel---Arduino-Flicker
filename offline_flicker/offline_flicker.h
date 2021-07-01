@@ -5,7 +5,6 @@
 class FlickerData 
 {
 public:
-	int pin = 2; 						//pin 				-> Pin number associated with lamp
 	int maxBrightness = 1200; 			//maxBrightness 	-> Highest value possibile				
 	int minBrightness = 0; 				//minBrightness 	-> Lowest value possible				
 	int smoothing = 1; 					//smoothing 		-> Controls the speed at which the light ramps up and down				
@@ -21,7 +20,6 @@ class NanoFlickerData : public FlickerData
 public:
 	NanoFlickerData() 
 	{
-		pin = 2; 				//pin 				-> Pin number associated with lamp
 		maxBrightness = 255; 	//maxBrightness 	-> Highest value possibile, for NANO this is 255				
 		minBrightness = 0; 		//minBrightness 	-> Lowest value possible				
 		smoothing = 1; 			//smoothing 		-> Controls the speed at which the light ramps up and down				
@@ -38,7 +36,6 @@ class ESP8266Data : public FlickerData
 public:
 	ESP8266Data() 
 	{
-		pin = 2; 				//pin 				-> Pin number associated with lamp
 		maxBrightness = 1200; 	//maxBrightness 	-> Highest value possibile, for NANO this is 255				
 		minBrightness = 0; 		//minBrightness 	-> Lowest value possible				
 		smoothing = 1; 			//smoothing 		-> Controls the speed at which the light ramps up and down				

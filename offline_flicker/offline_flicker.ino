@@ -5,12 +5,17 @@
 /** --------------------- CHANGE THESE VALUES --------------------- **/
 
 /* 
-Set this to the number of flicker effects you are controlling with the ardunio device: */
-	#define NUM_FLICKER_EFFECTS 2
+Set this to a pin that is safe to read for the random seed: */
+	#define RAND_PIN A0
 
 /* 
 Set this to the number of flicker effects you are controlling with the ardunio device: */
 	#define NUM_FLICKER_EFFECTS 2
+
+/* 
+Set the pins for each flicker effects light 
+(Note: there should be NUM_FLICKER_EFFECTS pins declared, so if that value is 2, then 2 pins need to be declared inside the '{}'): */
+	int Pins[NUM_FLICKER_EFFECTS] = {2, 2};
 
 /* 
 Uncomment the type of Arduino device you are using: */
@@ -46,7 +51,7 @@ void setup()
 {
 	Serial.begin(115200);
 	
-	randomSeed(analogRead(A0));
+	randomSeed(analogRead(RAND_PIN));
 
 	// Initial Setup
 	for (int i = 0; i < NUM_FLICKER_EFFECTS; ++i)
@@ -73,7 +78,7 @@ void loop()
 			{
 				// Instantly drop some amount
 				unsigned int instantDropLevel = downLimit[i] + (upLimit[i] - downLimit[i])/Flicker->dropValue;
-				analogWrite(Flicker->pin, instantDropLevel);
+				analogWrite(Pins[i], instantDropLevel);
 
 				// Slowly drop the rest of the way after this delay
 				int actualDropDelay = Flicker->dropDelay * (upLimit[i] - instantDropLevel)/Flicker->dropValue;
@@ -116,6 +121,6 @@ void loop()
 		level[i] += direction[i];
 
 		// Write the new light level
-		analogWrite(Flicker->pin, level[i]);
+		analogWrite(Pins[i], level[i]);
 	}
 }
