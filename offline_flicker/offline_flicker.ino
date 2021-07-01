@@ -1,45 +1,46 @@
 // Version for OFFLINE modules
 #include "offline_flicker.h"
 
+
+/** --------------------- CHANGE THESE VALUES --------------------- **/
+
 /* 
-	NOTE: These initial values are irrelevent. They are automatically set upon connecting to Firebase! 
+Set this to the number of flicker effects you are controlling with the ardunio device: */
+	#define NUM_FLICKER_EFFECTS 2
+
+/* 
+Set this to the number of flicker effects you are controlling with the ardunio device: */
+	#define NUM_FLICKER_EFFECTS 2
+
+/* 
+Uncomment the type of Arduino device you are using: */
+	#define TYPE_NANO 1
+	//#define TYPE_ESP8266 1
+
+/* 
+Uncomment to enable some debugging statements */
+	//#define RLD_DEBUG
+
+/** --------------------- -------------------- --------------------- **/
+
+
+
+/* 
+	Instance variables for all controlled flicker effects 
 */
-int upLimit = -1;					// Highest value during this cycle (Randomied each dimming cycle)
-int downLimit = -1;					// lowest value during this cycle (Randomied each dimming cycle)
-int level = -1;						// Actual value being sent to the dimmer circuit
-int direction = -1;					// +1 for ramping up, -1 for ramping down
-
-/*
-    Default settings for NANO flicker effect.
-*/
-FlickerData NanoFlicker = {
-    2, 		//pin 				-> Pin number associated with lamp
-    255, 	//maxBrightness 	-> Highest value possibile, for NANO this is 255				
-    0, 		//minBrightness 	-> Lowest value possible				
-    1, 		//smoothing 		-> Controls the speed at which the light ramps up and down				
-    1000, 	//rampDelay 		-> Controls the delay between each ramp increment. A higher rate will increase the perceived "flickering" of the light				
-    1000, 	//dropDelay 		-> The delay after the light level drops upon reaching the upLimit 				
-    1,  	//dropValue 		-> Controls how much of a drop is observered after hitting upLimit, a value of 1 negates the "instant drop" effect while higher values increase the effect				
-    10, 	//flickerDelayMin 	-> Conrols the minimum time between flicker cycles				
-    200 	//flickerDelayMax 	-> Controls the maximum time between flicker cycles				  
-};
-
-FlickerData* Flicker = &NanoFlicker;
+int upLimit[NUM_FLICKER_EFFECTS];					// Highest value during this cycle (Randomized each dimming cycle)
+int downLimit[NUM_FLICKER_EFFECTS];					// lowest value during this cycle (Randomized each dimming cycle)
+int level[NUM_FLICKER_EFFECTS];						// Actual value being sent to the dimmer circuit
+int direction[NUM_FLICKER_EFFECTS];					// +1 for ramping up, -1 for ramping down
+unsigned long delayTimes[NUM_FLICKER_EFFECTS];			// The next delay for the flicker effect
 
 
-/*
-	Set Variables:
-		minRampLength
-		minBrightness
-
-	Dynamic Variables:
-		rampRate
-
-*/
-
-// Nano PWM: 3, 5, 6, 9, 10, and 11
-
-#define RLD_DEBUG
+#ifdef TYPE_NANO
+FlickerData* Flicker = new NanoFlickerData();
+#endif
+#ifdef TYPE_ESP8266
+FlickerData* Flicker = new ESP8266Data();
+#endif
 
 void setup() 
 {
@@ -48,46 +49,73 @@ void setup()
 	randomSeed(analogRead(A0));
 
 	// Initial Setup
-	downLimit = Flicker->minBrightness;
-	upLimit = Flicker->maxBrightness;
-	level = downLimit + (upLimit - downLimit)/2;
-	direction = Flicker->smoothing;
+	for (int i = 0; i < NUM_FLICKER_EFFECTS; ++i)
+	{
+		downLimit[i] = Flicker->minBrightness;
+		upLimit[i] = Flicker->maxBrightness;
+		level[i] = downLimit[i] + (upLimit[i] - downLimit[i])/2;
+		direction[i] = Flicker->smoothing;
+		delayTimes[i] = 0;
+	}
 }
 
 void loop() 
 {
-	if (direction > 0) 
+	for (int i = 0; i < NUM_FLICKER_EFFECTS; ++i)
 	{
-		if (level >= upLimit) 
+		if (millis() < delayTimes[i])	// Flicker effect is delaying
+			continue;
+
+		// Otherwise, delay period has expired
+		if (direction[i] > 0)	// flicker effect is ramping up 
 		{
-			int instantDropLevel = downLimit + (upLimit - downLimit)/Flicker->dropValue;
-			analogWrite(Flicker->pin, instantDropLevel);
-			int actualDropDelay = Flicker->dropDelay * (upLimit - instantDropLevel)/Flicker->dropValue;
-			
-			if (actualDropDelay < 1)
-				actualDropDelay = 1;
-			if(actualDropDelay > MAX_DROP_DELAY)
-				actualDropDelay = MAX_DROP_DELAY;
+			if (level[i] >= upLimit[i])	// Max brightness has been reached 
+			{
+				// Instantly drop some amount
+				unsigned int instantDropLevel = downLimit[i] + (upLimit[i] - downLimit[i])/Flicker->dropValue;
+				analogWrite(Flicker->pin, instantDropLevel);
 
-			level = instantDropLevel;
+				// Slowly drop the rest of the way after this delay
+				int actualDropDelay = Flicker->dropDelay * (upLimit[i] - instantDropLevel)/Flicker->dropValue;
+				
+				// Ensure the delay is valid
+				if (actualDropDelay < 1)
+					actualDropDelay = 1;
+				if(actualDropDelay > MAX_DROP_DELAY)
+					actualDropDelay = MAX_DROP_DELAY;
 
-			upLimit = random(downLimit, Flicker->maxBrightness);
-			direction *= -1;
-			delayMicroseconds(actualDropDelay);
+				// Update the current light level
+				level[i] = instantDropLevel;
+
+				// Find a new max brightness for the next time flicker effect ramps up
+				upLimit[i] = random(downLimit[i], Flicker->maxBrightness);
+
+				// Reverse the direction, ramping down
+				direction[i] *= -1;
+
+				// Set new delay time (NOTE: actualDropDelay is in Microseconds, must convert to Milliseconds)
+				delayTimes[i] = millis() + (actualDropDelay * 1000);
+			}
+		} 
+		else // Flicker effect is ramping down
+		{
+			if (level[i] <= downLimit[i])	//Min brightness has been reached 
+			{
+				// Find a new min brightness for the next time flicker effect ramps down
+				downLimit[i] = random(Flicker->minBrightness, upLimit[i]);
+
+				// Reverse the direction, ramping up
+				direction[i] *= -1;
+
+				// Set new delay time
+				delayTimes[i] = millis() + random(Flicker->flickerDelayMin, Flicker->flickerDelayMax);
+			}	
 		}
-	} else 
-	{
-		if (level <= downLimit) 
-		{
-			downLimit = random(Flicker->minBrightness, upLimit);
-			direction *= -1;
-			delay(random(Flicker->flickerDelayMin, Flicker->flickerDelayMax));
-		}	
+
+		// Ramp light level by the current interval (Note: direction is a product of the smoothing value)
+		level[i] += direction[i];
+
+		// Write the new light level
+		analogWrite(Flicker->pin, level[i]);
 	}
-
-	level += direction;
-	
-	delayMicroseconds(Flicker->rampDelay);
-
-	analogWrite(Flicker->pin, level);
 }
