@@ -71,6 +71,12 @@ void loop()
 		if (millis() < delayTimes[i])	// Flicker effect is delaying
 			continue;
 
+		// Ramp light level by the current interval (Note: direction is a product of the smoothing value)
+		level[i] += direction[i];
+
+		// Write the new light level
+		analogWrite(Pins[i], level[i]);
+
 		// Otherwise, delay period has expired
 		if (direction[i] > 0)	// flicker effect is ramping up 
 		{
@@ -99,7 +105,8 @@ void loop()
 				direction[i] *= -1;
 
 				// Set new delay time (NOTE: actualDropDelay is in Microseconds, must convert to Milliseconds)
-				delayTimes[i] = millis() + (actualDropDelay * 1000);
+				delayTimes[i] = millis() + (actualDropDelay / 1000);
+				continue;
 			}
 		} 
 		else // Flicker effect is ramping down
@@ -114,13 +121,11 @@ void loop()
 
 				// Set new delay time
 				delayTimes[i] = millis() + random(Flicker->flickerDelayMin, Flicker->flickerDelayMax);
+				continue;
 			}	
 		}
 
-		// Ramp light level by the current interval (Note: direction is a product of the smoothing value)
-		level[i] += direction[i];
-
-		// Write the new light level
-		analogWrite(Pins[i], level[i]);
+		// Delay normal ramp time
+		delayTimes[i] = millis() + Flicker->rampDelay;
 	}
 }
