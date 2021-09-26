@@ -1,6 +1,6 @@
 #include "firebaseFunctions.h"
 
-#define WLD_DEBUG
+//#define WLD_DEBUG
 void writeLocalData()
 {
   if (!SPIFFS.format()) {
@@ -28,7 +28,7 @@ void writeLocalData()
 }
 
 
-#define CON_WIFI_DEBUG
+//#define CON_WIFI_DEBUG
 void connectToWiFi() {
   WiFiSetup = true;
   WiFi.begin(WIFI_AP_NAME, WIFI_AP_PASS);
@@ -60,7 +60,7 @@ void connectToFirebase() {
     Firebase.setStreamCallback(firebaseDataRECV, handleDataRecieved, handleTimeout);
 }
 
-#define SETUP_FF_DEBUG
+//#define SETUP_FF_DEBUG
 void setupFirebaseFunctions() {
     char* temp = (char* )malloc(50 * sizeof(char));
 
@@ -75,7 +75,7 @@ void setupFirebaseFunctions() {
 #endif
 }
 
-#define HAR_DEBUG
+//#define HAR_DEBUG
 void handleDataRecieved(StreamData data) {
     if (data.dataType() == "json") {
 #ifdef HAR_DEBUG
