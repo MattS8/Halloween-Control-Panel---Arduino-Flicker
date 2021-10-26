@@ -490,6 +490,32 @@ void setup()
 // Arduino Loop Function
 void loop()
 {
-    if (FirebaseSetDelay > millis())
-        return;
+	if (direction > 0) {
+		if (level >= upLimit) {
+			int instantDropLevel = downLimit + (upLimit - downLimit)/Lantern.dropValue;
+			analogWrite(Lantern.pin, instantDropLevel);
+			int actualDropDelay = Lantern.dropDelay * (upLimit - instantDropLevel)/Lantern.dropValue;
+			
+			if (actualDropDelay < 1)
+				actualDropDelay = 1;
+			if(actualDropDelay > MAX_DROP_DELAY)
+				actualDropDelay = MAX_DROP_DELAY;
+
+			level = instantDropLevel;
+
+			upLimit = random(downLimit, Lantern.maxBrightness);
+			direction *= -1;
+			delayMicroseconds(actualDropDelay);
+		}
+	} else {
+		if (level <= downLimit) {
+			downLimit = random(Lantern.minBrightness, upLimit);
+			direction *= -1;
+			delay(random(Lantern.flickerDelayMin, Lantern.flickerDelayMax));
+		}	
+	}
+	level += direction;
+	delayMicroseconds(Lantern.rampDelay);
+
+	analogWrite(Lantern.pin, level);
 }
