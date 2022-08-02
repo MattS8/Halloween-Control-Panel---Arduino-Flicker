@@ -107,7 +107,7 @@ void readLocalData()
 ////////////////////////////////////////////////////////////////////////////////
 void setupFirebase()
 {
-//#define SF_DEBUG
+#define SF_DEBUG
 
     #ifdef SF_DEBUG
         Serial.printf("Firebase Client v%s\n\n", FIREBASE_CLIENT_VERSION);
@@ -479,6 +479,8 @@ void setup()
 	randomSeed(analogRead(A0));
 
 	readLocalData();
+
+    analogWrite(Lantern.pin, (Lantern.maxBrightness + Lantern.minBrightness) / 2);
 
     connectToWiFi();
 
